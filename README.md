@@ -1,10 +1,10 @@
 # Deep Reconstruction of 3D Smoke Densities from Artist Sketches
 
-Pytorch implementation of [Deep Reconstruction of 3D Smoke Densities from Artist Sketches](http://www.byungsoo.me/project/sketch2density). 
+PyTorch implementation of [Deep Reconstruction of 3D Smoke Densities from Artist Sketches](http://www.byungsoo.me/project/sketch2density). 
 
 [Byungsoo Kim](http://www.byungsoo.me), [Xingchang Huang](https://people.mpi-inf.mpg.de/~xhuang), Laura Wuelfroth, [Jingwei Tang](https://people.inf.ethz.ch/~jitang/), [Guillaume Cordonnier](http://www-sop.inria.fr/members/Guillaume.Cordonnier), [Markus Gross](https://graphics.ethz.ch/people/grossm), [Barbara Solenthaler](https://graphics.ethz.ch/~sobarbar/)
 
-ETH Zurich, Max Planck Institute for Informatics, Inria, Universit&eacute; C&ocirc;te d'Azur
+ETH Zurich, Max Planck Institute for Informatics, Inria d'Universit&eacute; C&ocirc;te d'Azur
 
 Computer Graphics Forum (Proceedings of Eurographics 2022)
 
@@ -12,7 +12,7 @@ Computer Graphics Forum (Proceedings of Eurographics 2022)
 
 ## Install
 
-We strongly recommend use a conda enviroment to develop this package. If you don't have one create it.
+We strongly recommend to use a conda enviroment to develop this package. If you don't have one create it.
 
 ```bash
   # install conda
@@ -26,6 +26,11 @@ We strongly recommend use a conda enviroment to develop this package. If you don
   # create conda environment
   conda env create -f project_env.yml
   conda activate sketch2fluid
+```
+
+## Houdini Plugin
+```bash
+  git checkout houdini_plugin
 ```
 
 ## Original Repository
