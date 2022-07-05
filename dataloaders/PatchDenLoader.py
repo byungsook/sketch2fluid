@@ -20,9 +20,12 @@ torch.cuda.manual_seed(42)
 torch.cuda.manual_seed_all(42)
 
 class Loader(Dataset):
-    def __init__(self, data_dir, train_or_test, ratio=1):
+    def __init__(self, data_dir, train_or_test, vmax=1, dmax=1, max_i=5, activ_d='tanh', window_size=4, ratio=1):
         
-        
+        self.vmax = vmax
+        self.dmax = dmax
+        self.activ_d = activ_d
+        self.window_size = window_size
         self.splitter = '/'
         if platform.system().lower() == 'windows':
             self.splitter = '\\'
@@ -64,18 +67,14 @@ class Loader(Dataset):
 
     def load_data(self, sim):
         data = np.load(sim)
-
-        try:
-            d = data['density']
-        except:
-            d = data['d'] # [0,1]
-        # v = data['v'] / self.vmax # normalized to [-1,1]
-        return d
+        d = data['d']   # [0,1]
+        v = data['v'] / self.vmax # normalized to [-1,1]
+        return d, v
 
     def __getitem__(self, index):
         ds = []
         fn = self.data[index]
-        d0 = self.load_data(fn)
+        d0, v0 = self.load_data(fn)
         ds.append(torch.FloatTensor(np.expand_dims(d0,0)))
         ds = torch.cat(ds, 0)
         

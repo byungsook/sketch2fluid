@@ -17,7 +17,7 @@ import platform
 
 class Loader(Dataset):
     # def __init__(self, data_dir, train_or_test, vmax, dmax=50, max_i):
-    def __init__(self, data_dir, train_or_test, ratio=1):
+    def __init__(self, data_dir, train_or_test, vmax=1, dmax=1, max_i=5, activ_d='tanh', window_size=4, ratio=1):
 
         self.test_list = ['000000', '000100']
         self.train_list = []
@@ -26,7 +26,7 @@ class Loader(Dataset):
             if sim_idx not in self.test_list:
                 self.train_list.append(sim_idx)
 
-        # print (len(self.test_list), len(self.train_list))
+        print (len(self.test_list), len(self.train_list))
         
         self.start_frame = 31
         self.sim_list = glob.glob(data_dir+'/*')
@@ -34,7 +34,12 @@ class Loader(Dataset):
         self.splitter = '/'
         if platform.system().lower() == 'windows':
             self.splitter = '\\'
+
+        # self.den_list.sort(key=self.cmp)
         
+        self.vmax = vmax
+        self.dmax = dmax
+
         self.den_data = []
         self.vel_data = []
         

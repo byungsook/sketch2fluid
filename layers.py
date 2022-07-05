@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import torch
 import torch.nn as nn
-from torchvision import models
+#from torchvision import models
 
 
 def conv2d(nin, nout, activ, ks=3, s=2, p=1, bn=False, pn=False):

@@ -31,7 +31,7 @@ import math
 import sketch_jitter
 import render
 from spatial_transform_rotation.spatial_transformer import SpatialTransformer
-from models.pix2vox import Pix2VoxPair_sm, OptimParams
+from models.pix2vox import Pix2VoxPairVel, Pix2VoxPairOptim, Pix2VoxPair_sm, OptimParams
 from models.lsm import LSM
 import random
 
@@ -86,17 +86,17 @@ class Trainer(object):
             Input: opt
             Func: load data to loaders
         '''
-        self.train_dset = self.loader(opt.data, 'train', opt.ratio)
+        self.train_dset = self.loader(opt.data, 'train', opt.vmax, opt.dmax, opt.max_i, opt.activ_d, opt.window_size, opt.ratio)
         self.train_loader = DataLoader(self.train_dset, batch_size=opt.batch_size, shuffle=True, num_workers=opt.workers, pin_memory=True, drop_last=True)# worker_init_fn=worker_init_fn)
 
-        self.test_dset = self.loader(opt.data, opt.val_set, opt.ratio)
+        self.test_dset = self.loader(opt.data, opt.val_set, opt.vmax, opt.dmax, opt.max_i, opt.activ_d, opt.window_size, opt.ratio)
         self.test_loader = DataLoader(self.test_dset, batch_size=opt.batch_size, shuffle=False, num_workers=opt.workers, pin_memory=True, drop_last=False)#, worker_init_fn=worker_init_fn)
         
         self.artist_loader = {}
         from dataloaders.TestArtist import Loader
         # for scene, sigma in zip(['dissolve2', 'fraser_iteration3', 'artists'], [0.6, 1.3, 0.6]): # full test
         for scene, sigma in zip(['artists'], [0.6]): # small test
-            test_dset = Loader('scenes/'+scene+'/frames', sigma)
+            test_dset = Loader('scenes/'+scene+'/frames', opt.window_size, sigma)
             test_loader = DataLoader(test_dset, batch_size=1, shuffle=False, num_workers=0, pin_memory=True, drop_last=True)
             self.artist_loader[scene] = test_loader
 
@@ -104,7 +104,7 @@ class Trainer(object):
         from dataloaders.TestSynthetic import Loader
         # for scene in ['character2', 'character2_cloud', 'smoke_gun', 'turbulent', 'animated_cloud', 'wdas_cloud', 'puppy', 'puppy_cloud', 'sim_000000', 'sim_000100']: # full test
         for scene in ['character2']: # small test
-            test_dset = Loader('scenes/'+scene)
+            test_dset = Loader('scenes/'+scene, opt.window_size, self.steps)
             test_loader = DataLoader(test_dset, batch_size=1, shuffle=False, num_workers=0, pin_memory=True, drop_last=False)
             self.synthetic_loader[scene] = test_loader
 
@@ -119,8 +119,8 @@ class Trainer(object):
             Func: build models and tools for training
         '''
 
-        self.opt_params = OptimParams(bn=opt.BN, droprate=opt.droprate, nout=1).to(opt.device)
-        self.pix2vox_pair = Pix2VoxPair_sm(bn=opt.BN, droprate=opt.droprate, nout=1).to(opt.device)
+        self.opt_params = OptimParams(bn=opt.BN, zdim=opt.zdim, droprate=opt.droprate, nout=1).to(opt.device)
+        self.pix2vox_pair = Pix2VoxPair_sm(bn=opt.BN, zdim=opt.zdim, droprate=opt.droprate, nout=1).to(opt.device)
         self.lsm = LSM(device=opt.device, preprocess=opt.lsm_preprocess).to(opt.device)
         print ('===> Number of Parameters Pix2VoxPair: {:.4f} M'.format(sum(p.numel() for p in self.pix2vox_pair.parameters() if p.requires_grad)/1e6 ))
 
@@ -311,7 +311,7 @@ class Trainer(object):
             if not os.path.exists(out):
                 os.makedirs(out)
 
-            # scale = opt.scale
+            scale = opt.scale
 
             s_losses, d_losses = [], []
             ivm_times = []
@@ -970,18 +970,19 @@ class Trainer(object):
 
     def train(self, opt):
         print ('===> Training ...')
-        
-        # scale = opt.scale
+        self.summary_writer.add_text('text', opt.stage)
+
+        scale = opt.scale
         epoch = 0
 
         w_sketch = opt.w_sketch
         w_d = opt.w_d
         w_tv = opt.w_tv
-        # w_proj = opt.w_proj
-        # w_render = opt.w_render
-        # w_grad = opt.w_grad
+        w_proj = opt.w_proj
+        w_render = opt.w_render
+        w_grad = opt.w_grad
         w_tv = opt.w_tv
-        # w_cls = opt.w_cls
+        w_cls = opt.w_cls
         w_prev = 1
         
         passes = self.opt.passes

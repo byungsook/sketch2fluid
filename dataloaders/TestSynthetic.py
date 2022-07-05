@@ -27,7 +27,7 @@ sys.path.append('../')
 # data range: dmax: 1.4354, dmin: 0.0000; vmax: 1.9781, vmin: -2.4203
 
 class Loader(Dataset):
-    def __init__(self, data_dir):
+    def __init__(self, data_dir, window_size=10, steps=20):
         
         self.splitter = '/'
         if platform.system().lower() == 'windows':
