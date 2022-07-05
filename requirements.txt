@@ -1,0 +1,16 @@
+numpy
+matplotlib
+tqdm
+pillow
+scipy
+tensorboard
+imageio
+imageio-ffmpeg
+scikit-image
+trimesh
+pyglet
+wandb
+flake8
+pre-commit
+black
+sphinx
